@@ -8,6 +8,7 @@ import (
 )
 
 func main() {
+	fmt.Println("hello world")
 	requests := makeSeeds()
 
 	e := engine.ConcurrentEngine{
