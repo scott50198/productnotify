@@ -1,4 +1,4 @@
-package controller
+package handler
 
 import (
 	"fmt"
@@ -10,20 +10,39 @@ import (
 	"strings"
 )
 
-type ItemController struct {
-	Items map[string]model.Item
+type ItemHandler struct {
+	items    map[string]bool
+	itemChan chan model.Item
 }
 
-func (c *ItemController) Build() {
-	c.Items = make(map[string]model.Item)
+func (this *ItemHandler) Build() {
+	this.items = make(map[string]bool)
+	this.itemChan = make(chan model.Item)
+	go func() {
+		for {
+			item := <-this.itemChan
+			this.handleItem(item)
+		}
+	}()
 }
 
-func (c *ItemController) CheckItemExist(url string) bool {
-	_, ok := c.Items[url]
+func (this *ItemHandler) GetItemChan() chan model.Item {
+	return this.itemChan
+}
+
+func (this *ItemHandler) handleItem(item model.Item) {
+	fmt.Printf("got item : %v\n", item)
+	if this.checkItemExist(item) {
+		this.lineNotify(item)
+	}
+}
+
+func (this *ItemHandler) checkItemExist(item model.Item) bool {
+	_, ok := this.items[item.Url]
 	return ok
 }
 
-func (c *ItemController) LineNotify(item model.Item) {
+func (this *ItemHandler) lineNotify(item model.Item) {
 	client := http.Client{}
 	form := url.Values{}
 	form.Add("message", item.Title+" : "+item.Url)

@@ -4,16 +4,14 @@ import (
 	"productnotify/crawler/engine"
 	"productnotify/crawler/model"
 	"productnotify/crawler/parser"
-	"productnotify/crawler/scheduler"
 )
 
 func main() {
-	fmt.Println("hello world")
 	requests := makeSeeds()
 
-	e := engine.ConcurrentEngine{
+	e := engine.Engine{
 		WorkCount:         5,
-		Scheduler:         scheduler.SimpleScheduler{},
+		Scheduler:         engine.Scheduler{},
 		RestartTimeSecond: 60,
 	}
 
