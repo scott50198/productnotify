@@ -4,12 +4,25 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 )
 
-func Get(url string) ([]byte, error) {
-	req, _ := http.NewRequest(http.MethodGet, url, nil)
+var (
+	ChangeProxy bool = false
+	Host        string
+	Port        string
+)
+
+func Get(siteUrl string) ([]byte, error) {
+	req, _ := http.NewRequest(http.MethodGet, siteUrl, nil)
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36")
-	httpClient := http.Client{}
+	httpClient := &http.Client{}
+
+	if ChangeProxy {
+		proxyUrl, _ := url.Parse("http://" + Host + ":" + Port)
+		httpClient = &http.Client{Transport: &http.Transport{Proxy: http.ProxyURL(proxyUrl)}}
+	}
+
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err

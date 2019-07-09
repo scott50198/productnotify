@@ -26,14 +26,14 @@ func (this *ItemHandler) Build() {
 	}()
 }
 
-func (this *ItemHandler) GetItemChan() chan model.Item {
-	return this.itemChan
+func (this *ItemHandler) Submit(item model.Item) {
+	this.itemChan <- item
 }
 
 func (this *ItemHandler) handleItem(item model.Item) {
 	fmt.Printf("got item : %v\n", item)
-	if this.checkItemExist(item) {
-		this.lineNotify(item)
+	if !this.checkItemExist(item) {
+		// this.lineNotify(item)
 	}
 }
 
