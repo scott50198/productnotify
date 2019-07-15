@@ -15,11 +15,24 @@ type ProxyHandler struct {
 func (this *ProxyHandler) Build() {
 	this.errorChan = make(chan error)
 	go func() {
+		this.fetchProxyList()
 		for {
 			err := <-this.errorChan
 			this.handleError(err)
 		}
 	}()
+}
+
+func (this *ProxyHandler) fetchProxyList() {
+	contents, err := fetcher.Get("https://free-proxy-list.net/")
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	list, err := parser.ParseProxyList(contents)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	this.proxyList = list
 }
 
 func (this *ProxyHandler) GetErrorChan() chan error {
