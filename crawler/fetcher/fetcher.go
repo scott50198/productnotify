@@ -5,23 +5,15 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"productnotify/crawler/model"
+	"time"
 )
 
-var (
-	ChangeProxy bool = false
-	Host        string
-	Port        string
-)
-
-func Get(siteUrl string) ([]byte, error) {
-	req, _ := http.NewRequest(http.MethodGet, siteUrl, nil)
+func Get(url string) ([]byte, error) {
+	req, _ := http.NewRequest(http.MethodGet, url, nil)
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36")
-	httpClient := &http.Client{}
 
-	if ChangeProxy {
-		proxyUrl, _ := url.Parse("http://" + Host + ":" + Port)
-		httpClient = &http.Client{Transport: &http.Transport{Proxy: http.ProxyURL(proxyUrl)}}
-	}
+	httpClient := &http.Client{}
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
@@ -32,23 +24,27 @@ func Get(siteUrl string) ([]byte, error) {
 	if resp.StatusCode != 200 {
 		return nil, fmt.Errorf("Fetch error : status code %d", resp.StatusCode)
 	}
-	// bufBody := bufio.NewReader(resp.Body)
-	// utf8Reader := transform.NewReader(bufBody, determineEncoding(bufBody).NewDecoder())
+
 	body, err := ioutil.ReadAll(resp.Body)
 	return body, err
 }
 
-func Post(url string, body map[string]string) ([]byte, error) {
+func ProxyGet(site string, proxy model.Proxy) ([]byte, error) {
+	proxyUrl, _ := url.Parse(proxy.Scheme + "://" + proxy.Host + ":" + proxy.Port)
+	myClient := &http.Client{
+		Transport: &http.Transport{Proxy: http.ProxyURL(proxyUrl)},
+		Timeout:   time.Duration(5 * time.Second),
+	}
 
-	return nil, nil
+	resp, err := myClient.Get(site)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("Fetch error ,Status code : ", resp.StatusCode)
+	}
+
+	return ioutil.ReadAll(resp.Body)
 }
-
-// // 根据html的meta头，试图自动转换编码到utf8
-// func determineEncoding(r *bufio.Reader) encoding.Encoding {
-// 	data, err := r.Peek(1024)
-// 	if err != nil {
-// 		return unicode.UTF8
-// 	}
-// 	e, _, _ := charset.DetermineEncoding(data, "")
-// 	return e
-// }

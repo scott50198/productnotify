@@ -21,6 +21,7 @@ func (this *WorkerDispatcher) CreateWorker(in chan model.Request, out chan model
 				request := <-in
 				result, err := GetParseResult(request)
 				if err != nil {
+					in <- request
 					continue
 				}
 				out <- result

@@ -23,7 +23,7 @@ func ParseProxyList(contents []byte) ([]model.Proxy, error) {
 				Host:     string(proxys[i][1]),
 				Port:     string(ports[i][1]),
 				Location: string(locations[i][1]),
-				Secure:   string(secures[i][1]) == "yes",
+				Scheme:   string(secures[i][1]),
 			})
 	}
 

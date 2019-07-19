@@ -3,6 +3,6 @@ package model
 type Proxy struct {
 	Host     string
 	Port     string
-	Secure   bool
+	Scheme   string
 	Location string
 }
